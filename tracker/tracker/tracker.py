@@ -1,4 +1,4 @@
-"""Glues detector and filter together. All occlusion handling lives here."""
+"""Where the detector and filter meet. All the occlusion handling is here."""
 
 from dataclasses import dataclass
 from enum import Enum, auto
@@ -7,17 +7,17 @@ import numpy as np
 
 
 class TrackState(Enum):
-    SEARCHING = auto()   # no track yet, waiting for a first detection
-    TRACKING = auto()    # detection accepted this frame
-    COASTING = auto()    # no usable detection, running on prediction alone
-    LOST = auto()        # coasted too long, will reset to SEARCHING
+    SEARCHING = auto()   # no track, waiting for a detection
+    TRACKING = auto()    # used a detection this frame
+    COASTING = auto()    # no (good) detection, prediction only
+    LOST = auto()        # coasted too long, goes back to SEARCHING next frame
 
 
 @dataclass
 class TrackResult:
     frame_idx: int
-    detection: tuple | None        # raw detector output
-    position: np.ndarray | None    # filtered estimate
+    detection: tuple | None        # straight from the detector
+    position: np.ndarray | None    # filter's estimate
     position_cov: np.ndarray | None
     state: TrackState
 
@@ -42,7 +42,7 @@ class Tracker:
         
 
     def step(self, frame, force_miss=False):
-        """Process one frame. force_miss simulates occlusion for demos/tests."""
+        """One frame. force_miss fakes an occlusion (--fake-occlusion)."""
 
         if self.state == TrackState.LOST: 
             self.state=TrackState.SEARCHING

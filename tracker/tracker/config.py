@@ -1,21 +1,21 @@
-"""All tunable numbers in one place."""
+"""Every number I might want to tweak, so I'm not hunting through files."""
 
 
 # Kalman filter
-DT = 1.0                 # time step in frames (use 1/fps for seconds)
-PROCESS_VAR = 1.0        # Q scale: unmodeled acceleration, pixels/frame^2
-MEAS_VAR = 25.0          # R: detector jitter, pixels^2 (std ~5 px)
+DT = 1.0                 # working in frames, 1/fps if I want real units
+PROCESS_VAR = 10        # Q scale, bumped up from 1.0
+MEAS_VAR = 25.0          # R, detector jitter in px^2 (~5 px std)
 INIT_POS_VAR = 25.0
-INIT_VEL_VAR = 1000.0    # we know nothing about velocity at first
+INIT_VEL_VAR = 1000.0    # huge on purpose, no clue about velocity on frame 1
 
 # Tracker
-MAX_COAST_FRAMES = 30    # frames to predict through before declaring the track lost
-GATE_THRESHOLD = 9.21    # chi-squared, 2 DOF, 99%
+MAX_COAST_FRAMES = 30    # ~1s at 30fps then give up
+GATE_THRESHOLD = 9.21    # chi^2, 2 dof, 99%
 
-# Colour detector (HSV). Example values for a bright green ball; tune for yours.
+# HSV range for the green ball. orange video doesn't work with these, use bgsub for it
 HSV_LOWER = (35, 80, 80)
 HSV_UPPER = (85, 255, 255)
-MIN_AREA = 100           # ignore blobs smaller than this, pixels
+MIN_AREA = 100           # px, anything smaller is noise
 
 
 

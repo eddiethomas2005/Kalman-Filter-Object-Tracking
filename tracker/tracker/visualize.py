@@ -1,4 +1,4 @@
-"""Drawing on frames during the run, and plots after it."""
+"""Drawing on the frames while it runs, plus the plot at the end."""
 
 import config
 import cv2
@@ -11,9 +11,10 @@ import os
 
 
 
-STATE_COLOURS ={ TrackState.TRACKING: (0,0,0),
-                TrackState.COASTING: (0,0,0),
-                 TrackState.SEARCHING: (0,0,0),
+STATE_COLOURS ={ # BGR not RGB
+                TrackState.TRACKING: (255,0,0),
+                TrackState.COASTING: (0,255,0),
+                 TrackState.SEARCHING: (0,0,255),
                   TrackState.LOST: (0,0,255) }
 
 STATE_LABELS = {TrackState.TRACKING: "Tracking",
@@ -25,7 +26,7 @@ STATE_LABELS = {TrackState.TRACKING: "Tracking",
 
 
 def draw_uncertainty_ellipse(frame, center, cov, n_sigma=2.0,thickness=2, colour=(0, 255, 0)): #an elipse is drawn from the degrees of freedom all possible places ball can go
-    """Ellipse from the 2x2 position covariance."""
+    """2 sigma ellipse from the position covariance."""
     vals, vecs = np.linalg.eigh(cov) #gets eigen vectors and eigenvalues of covarience matrix
     axes = n_sigma * np.sqrt(vals) # converts variance into standard deviation this will be half length of eclipse
     angle = np.degrees(np.arctan2(vecs[1,0],vecs[0,0])) #finds angle of first vector as matrix is symetric then other angle will be perpendicular
@@ -38,7 +39,7 @@ def intTuple (floatArray):
     return (int(floatArray[0]),int(floatArray[1]))
 
 def draw_frame(frame, result, history):
-    """Red dot = raw detection, green circle + ellipse = filtered, trail, state label."""
+    """Red dot = detection, green circle + ellipse = filter, black trail, state top left."""
     state = result.state
     detection = result.detection 
     
@@ -69,7 +70,7 @@ def draw_frame(frame, result, history):
 
 
 def plot_trajectories(results, out_path):
-    """Matplotlib plot of raw detections vs. filtered path; shade coasting frames."""
+    """Raw detections vs filter path, coasting frames in orange."""
     x_raw=[]
     y_raw=[]
     x_filt=[]

@@ -1,4 +1,4 @@
-"""Test the filter on synthetic data. No video, no OpenCV."""
+"""Filter tests on a fake noisy straight line, no video needed."""
 
 import sys
 from pathlib import Path
@@ -36,7 +36,7 @@ def new_kf():
 def test_filter_smoother_than_measurements():
     truth, meas = make_track()
     est = run(new_kf(), meas)
-    # skip the first 10 frames while velocity converges
+    # ignore first 10 frames, velocity starts at 0 so it needs to settle
     assert np.abs(est[10:] - truth[10:]).mean() < np.abs(meas[10:] - truth[10:]).mean()
 
 
@@ -54,3 +54,13 @@ def test_uncertainty_grows_while_coasting():
     for _ in range(10):
         kf.predict()
     assert np.trace(kf.position_cov) > before
+
+def test_reinitialize_resets_uncertainty():
+    kf = new_kf()
+    kf.initialize((0, 0))
+    for _ in range(31):   # long enough that the tracker would call it LOST
+        kf.predict()
+    kf.initialize((5, 5))
+    expected = np.diag([kf.init_pos_var, kf.init_pos_var,
+                        kf.init_vel_var, kf.init_vel_var])
+    assert np.allclose(kf.P, expected)

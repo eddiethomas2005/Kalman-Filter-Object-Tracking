@@ -1,11 +1,11 @@
-"""Detectors: frame in, (x, y) centroid or None out. Know nothing about Kalman filters."""
+"""Detectors. Frame in, (x, y) of the ball or None out. Don't know about the filter at all."""
 
 import cv2
 import numpy as np
 
 
 def _largest_blob_centroid(mask, min_area):
-    """Centroid of the largest contour in a binary mask, or None."""
+    """Centre of the biggest blob in the mask, or None."""
     
     contours, _ = cv2.findContours(mask,cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE) #ret tuple
     #retr_ext ignores holes in blobs aka only gives external contour
@@ -28,7 +28,7 @@ class ColorDetector:
         self.upper = np.array(hsv_upper)
         self.min_area = min_area
         self.kernel = np.ones((5, 5), np.uint8)
-        self.last_mask = None   # keep for debugging / side-by-side view
+        self.last_mask = None   # kept for debugging
 
     def detect(self, frame):
         hsvFrame = cv2.cvtColor(frame,cv2.COLOR_BGR2HSV) #convert to hue sat value

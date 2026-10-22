@@ -1,4 +1,4 @@
-"""Entry point: python main.py data/ball.mp4 --detector color --out output/tracked.mp4"""
+"""python main.py data/ball_long.mp4 --detector color --out output/tracked.mp4"""
 
 import argparse
 import csv
@@ -43,16 +43,16 @@ def main():
         ok, frame = cap.read()
         if not ok:
             break
-        idx = tracker.frame_idx
+        idx = tracker.frame_idx  # read before step() bumps it
         occluded = bool(args.fake_occlusion) and args.fake_occlusion[0] <= idx <= args.fake_occlusion[1]
         result = tracker.step(frame, force_miss=occluded)
         results.append(result)
         vis = draw_frame(frame, result, results)
 
-        if writer is None:
+        if writer is None:  # need the first frame's size before making the writer
             fourcc = cv2.VideoWriter_fourcc(*"mp4v")
             fps = cap.get(cv2.CAP_PROP_FPS)
-            if fps==0:
+            if fps==0:  # webcam gives 0
                 fps=30
             (height , width)=vis.shape[:2]
             os.makedirs(os.path.dirname(args.out), exist_ok=True)
